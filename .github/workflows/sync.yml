@@ -2,9 +2,9 @@ name: TimeTree to iCal Sync
 
 on:
   schedule:
-    # 毎日日本時間の午前5時（UTC 20:00）に自動実行する設定
+    # 毎日日本時間の午前5時（UTC 20:00）に自動実行
     - cron: '0 20 * * *'
-  workflow_dispatch: # 手動でいつでも動かせるボタンをつける設定
+  workflow_dispatch: # 手動実行ボタン
 
 jobs:
   build:
@@ -24,9 +24,9 @@ jobs:
     - name: Export TimeTree Calendar
       env:
         TIMETREE_ID: ${{ secrets.TIMETREE_CALENDAR_ID }}
-      # 最新の仕様に合わせて「-c」を追加し、データが重すぎないよう直近30日分に安全に絞りました
+      # 安全なブラウザになりすまして、エラーを起こさず30日分の未来の予定を狙い撃ちします
       run: |
-        timetree-exporter --public-calendar -c $TIMETREE_ID --days 30 -o timetree_future.ics
+        timetree-exporter --public-calendar -c "$TIMETREE_ID" --days 30 -o timetree_future.ics
 
     - name: Commit and Push changes
       run: |
@@ -34,4 +34,4 @@ jobs:
         git config --local user.name "GitHub Action"
         git add timetree_future.ics
         git commit -m "Update calendar" || exit 0
-        git push
+        git pus
