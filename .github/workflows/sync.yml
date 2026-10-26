@@ -1,0 +1,37 @@
+name: TimeTree to iCal Sync
+
+on:
+  schedule:
+    # 毎日日本時間の午前5時（UTC 20:00）に自動実行する設定
+    - cron: '0 20 * * *'
+  workflow_dispatch: # 手動でいつでも動かせるボタンをつける設定
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+
+    - name: Install timetree-exporter
+      run: pip install timetree-exporter
+
+    - name: Export TimeTree Calendar
+      env:
+        TIMETREE_ID: ${{ secrets.TIMETREE_CALENDAR_ID }}
+      # 最新の仕様に合わせて、真ん中の「-c」を追加しました
+      run: |
+        timetree-exporter --public-calendar -c $TIMETREE_ID --days 365 -o timetree_future.ics
+
+    - name: Commit and Push changes
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add timetree_future.ics
+        git commit -m "Update calendar" || exit 0
+        git push
