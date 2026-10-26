@@ -13,20 +13,12 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.x'
-
-    - name: Install timetree-exporter
-      run: pip install timetree-exporter
-
-    - name: Export TimeTree Calendar
+    # ツールの代わりに、安全なブラウザのふりをしてTimeTreeのデータを直接ICS形式でダウンロードします
+    - name: Download TimeTree iCal directly
       env:
         TIMETREE_ID: ${{ secrets.TIMETREE_CALENDAR_ID }}
-      # 安全なブラウザになりすまして、エラーを起こさず30日分の未来の予定を狙い撃ちします
       run: |
-        timetree-exporter --public-calendar -c "$TIMETREE_ID" --days 30 -o timetree_future.ics
+        curl -L -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" "https://timetreeapp.com{TIMETREE_ID}.ics" -o timetree_future.ics
 
     - name: Commit and Push changes
       run: |
@@ -34,4 +26,4 @@ jobs:
         git config --local user.name "GitHub Action"
         git add timetree_future.ics
         git commit -m "Update calendar" || exit 0
-        git pus
+        git push
