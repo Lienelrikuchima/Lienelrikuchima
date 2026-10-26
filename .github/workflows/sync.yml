@@ -24,9 +24,9 @@ jobs:
     - name: Export TimeTree Calendar
       env:
         TIMETREE_ID: ${{ secrets.TIMETREE_CALENDAR_ID }}
-      # 最新の仕様に合わせて、真ん中の「-c」を追加しました
+      # 最新の仕様に合わせて「-c」を追加し、データが重すぎないよう直近30日分に安全に絞りました
       run: |
-        timetree-exporter --public-calendar -c $TIMETREE_ID --days 365 -o timetree_future.ics
+        timetree-exporter --public-calendar -c $TIMETREE_ID --days 30 -o timetree_future.ics
 
     - name: Commit and Push changes
       run: |
